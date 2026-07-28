@@ -66,41 +66,33 @@ def lancar_raio_com_caminho(pos_x, pos_y, angulo_radianos, distancia_maxima_celu
 
     return celulas_livres, celula_obstaculo
 
-
 def criar_occupancy_grid(num_linhas, num_colunas):
     """Cria um grid de log-odds, tudo iniciado em 0.0 (= 50% de chance, desconhecido)."""
-    # TODO 3: Crie uma lista de listas (num_linhas x num_colunas), todas com valor 0.0.
-
-    grid = [0.0]
+    novo_occupancy_grid = [[0.0 for _ in range(num_colunas)] for _ in range(num_linhas)]
+    return novo_occupancy_grid
 
 
 def atualizar_occupancy_grid(occupancy_grid, celulas_livres, celula_obstaculo):
     """Aplica a evidência de UM raio (já processado) no occupancy_grid, in-place."""
 
-    # TODO 4: Para cada (linha, coluna) em celulas_livres, some EVIDENCIA_LIVRE
-    # na posição correspondente de occupancy_grid.
-    
+    for linha, coluna in celulas_livres:
+        occupancy_grid[linha][coluna] += EVIDENCIA_LIVRE
 
-    # TODO 5: Se celula_obstaculo não for None, some EVIDENCIA_OCUPADO
-    # na posição correspondente.
+    if celula_obstaculo is not None:
+        linha, coluna = celula_obstaculo
+        occupancy_grid[linha][coluna] += EVIDENCIA_OCUPADO
 
 
 def log_odds_para_probabilidade(log_odds):
     """Converte um valor de log-odds de volta para probabilidade (0 a 1)."""
-    # TODO 6: Fórmula inversa do log-odds.
-    #  p = 1 - 1 / (1 + e^log_odds)
-    # math.exp(x) calcula e^x
-    return None 
-
+    return 1 - 1 / (1 + math.exp(log_odds))
 
 occupancy = criar_occupancy_grid(len(grid), len(grid[0]))
 
-# Simula um scan de 16 raios a partir de (1.5, 1.5) e atualiza o occupancy grid
 for i in range(16):
     angulo = i * (2 * math.pi / 16)
     celulas_livres, celula_obstaculo = lancar_raio_com_caminho(1.5, 1.5, angulo)
     atualizar_occupancy_grid(occupancy, celulas_livres, celula_obstaculo)
 
-# Imprime o grid como probabilidades, célula por célula
 for linha in occupancy:
     print(" ".join(f"{log_odds_para_probabilidade(v):.2f}" for v in linha))
